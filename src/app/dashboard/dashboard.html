@@ -1,0 +1,57 @@
+<div class="dashboard-layout">
+  
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-circle">RS</div>
+        <h2 class="brand-name">Reserving System</h2>
+      </div>
+  
+      <nav class="sidebar-nav">
+        <a class="nav-item" routerLink="/dashboard/overview" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <span class="nav-text">Dashboard</span>
+        </a>
+        
+        <a class="nav-item" routerLink="/dashboard/halls" routerLinkActive="active">
+          <span class="nav-text">Halls</span>
+        </a>
+        <a class="nav-item" routerLink="/dashboard/groups" routerLinkActive="active">
+          <span class="nav-text">Groups</span>
+        </a>
+  
+        @if (currentUser?.isAdmin) {
+          <a class="nav-item" routerLink="/dashboard/users" routerLinkActive="active">
+            <span class="nav-text">Users</span>
+          </a>
+          <a class="nav-item">
+            <span class="nav-text">Settings</span>
+          </a>
+        }
+  
+        <a class="nav-item">
+          <span class="nav-text">My Profile</span>
+        </a>
+      </nav>
+    </aside>
+  
+    <div class="main-wrapper">
+      
+      <header class="top-navbar">
+        <div class="page-title">
+          <h3>Overview</h3>
+        </div>
+        
+        <div class="user-actions">
+          <span class="user-greeting">Welcome, {{ currentUser?.name }}</span>
+          
+          <button class="btn btn-outline-danger" (click)="onLogout()">
+            Logout
+          </button>
+        </div>
+      </header>
+      <main class="content-area">       
+        <router-outlet></router-outlet>       
+      </main>
+  
+    </div>
+  
+  </div>

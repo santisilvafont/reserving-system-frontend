@@ -1,0 +1,85 @@
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h2>Halls & Classrooms</h2>
+      <p class="subtitle">Manage and view all available spaces.</p>
+    </div>
+    
+    @if (isAdmin) {
+      <button class="btn btn-primary" (click)="openModal()">
+        + Add New Hall
+      </button>
+    }
+  </div>
+
+  <div class="halls-grid">
+    @for (hall of hallsList; track hall.id) {
+      <div class="hall-card" [class.inactive]="!hall.isActive">
+        <div class="card-header">
+          <h3>{{ hall.name }}</h3>
+          <span class="status-badge" [class.active]="hall.isActive">
+            {{ hall.isActive ? 'Active' : 'Disabled' }}
+          </span>
+        </div>
+
+        <div class="card-body">
+          <p class="description">{{ hall.description }}</p>
+        </div>
+
+        @if (isAdmin) {
+          <div class="card-actions">
+            <button class="btn-text" (click)="openModal(hall)">Edit</button>
+            <button class="btn-text text-danger" (click)="onToggleStatus(hall)">
+              {{ hall.isActive ? 'Disable' : 'Enable' }}
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@if (showModal) {
+  <div class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{ isEditing ? 'Edit Hall' : 'Create New Hall' }}</h3>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </div>
+
+      <form [formGroup]="hallForm" (ngSubmit)="saveHall()">
+        
+        <div class="form-group">
+          <label>Hall Name</label>
+          <input type="text" formControlName="name" placeholder="E.g. Main Auditorium"
+                 [class.error-highlight]="isHoveringSubmit && hallForm.get('name')?.invalid">
+        </div>
+
+        <div class="form-group">
+          <label>Description (Optional)</label>
+          <textarea formControlName="description" rows="3" placeholder="Describe the space and equipment..."
+                    [class.error-highlight]="isHoveringSubmit && hallForm.get('description')?.invalid"></textarea>
+        </div>
+
+        @if (formErrorMessage) {
+          <div class="global-error-message">
+            ⚠ {{ formErrorMessage }}
+          </div>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" (click)="closeModal()">Cancel</button>
+          
+          <span class="submit-wrapper" 
+                (mouseenter)="isHoveringSubmit = true" 
+                (mouseleave)="isHoveringSubmit = false">
+            
+            <button type="submit" class="btn btn-primary" [disabled]="hallForm.invalid">
+              {{ isEditing ? 'Save Changes' : 'Create Hall' }}
+            </button>
+          </span>          
+        </div>
+      </form>
+    </div>
+  </div>
+}

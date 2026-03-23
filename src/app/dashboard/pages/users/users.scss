@@ -1,0 +1,61 @@
+.table-wrapper {
+  background-color: var(--color-secondary);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+
+  th, td {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  tbody tr {
+    transition: background-color 0.2s;
+    &:hover { background-color: #f1f5f9; }
+  }
+
+  .disabled-row {
+    opacity: 0.6;
+    background-color: #f8fafc;
+  }
+}
+
+.fw-500 { font-weight: 500; color: var(--color-text); }
+.text-muted { color: #64748b; font-size: 0.95rem; }
+.text-right { text-align: right; }
+
+.role-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #e0e7ff;
+  color: #4338ca;
+
+  &.admin {
+    background-color: #fef08a;
+    color: #854d0e;
+  }
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
