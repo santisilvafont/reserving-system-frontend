@@ -9,6 +9,7 @@ import { AuthService } from '../auth.service';
   templateUrl: './forgot-password.html',
   styleUrl: './forgot-password.scss',
 })
+
 export class ForgotPassword {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);

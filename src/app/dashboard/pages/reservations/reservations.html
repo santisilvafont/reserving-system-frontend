@@ -1,0 +1,380 @@
+<div class="page-container">
+  
+  <div class="page-header">
+    <div>
+      <h2>Reservations</h2>
+      <p class="subtitle">Manage class schedules and hall bookings.</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreateModal()">
+      + New Reservation
+    </button>
+  </div>
+
+  <div class="tabs-container">
+    <button class="tab-btn" 
+            [class.active]="activeTab === 'calendar'" 
+            (click)="switchTab('calendar')">
+      Calendar View
+    </button>
+    <button class="tab-btn" 
+            [class.active]="activeTab === 'history'" 
+            (click)="switchTab('history')">
+      Historical & Filters
+    </button>
+  </div>
+
+  @if (successMessage) {
+    <div class="global-success-message" style="margin-bottom: 20px;">
+      {{ successMessage }}
+    </div>
+  }
+
+  @if (isLoading) {
+    <div class="loading-state text-muted" style="text-align: center; padding: 40px;">Loading data...</div>
+  }
+  @if (errorMessage) {
+    <div class="global-error-message" style="margin-bottom: 20px;">{{ errorMessage }}</div>
+  }
+
+  @if (!isLoading && !errorMessage) {
+    
+    @if (activeTab === 'calendar') {
+      <div class="calendar-wrapper">
+        <full-calendar #calendar [options]="calendarOptions"></full-calendar>
+      </div>
+    }
+
+    @if (activeTab === 'history') {
+      <div class="history-wrapper" style="width: 100%;">
+        
+        <div class="filters-bar" [formGroup]="filterForm">
+          <div class="filter-group">
+            <label>Filter by Status</label>
+            <div class="checkbox-list">
+              <label class="check-item"><input type="checkbox" (change)="toggleFilter('status', 'ALL')" [checked]="filterForm.value.status.includes('ALL')"> All Statuses</label>
+              <label class="check-item"><input type="checkbox" (change)="toggleFilter('status', 'PENDING')" [checked]="filterForm.value.status.includes('PENDING')"> 🟡 Pending</label>
+              <label class="check-item"><input type="checkbox" (change)="toggleFilter('status', 'APPROVED')" [checked]="filterForm.value.status.includes('APPROVED')"> 🟢 Approved</label>
+              <label class="check-item"><input type="checkbox" (change)="toggleFilter('status', 'REJECTED')" [checked]="filterForm.value.status.includes('REJECTED')"> 🔴 Rejected</label>
+              <label class="check-item"><input type="checkbox" (change)="toggleFilter('status', 'CANCELLED')" [checked]="filterForm.value.status.includes('CANCELLED')"> ⚪ Cancelled</label>
+            </div>
+          </div>
+
+          @if (currentUserInfo?.isAdmin) {
+            <div class="filter-group">
+              <label>Filter by User</label>
+              <div class="checkbox-list">
+                <label class="check-item"><input type="checkbox" (change)="toggleFilter('userId', 'ALL')" [checked]="filterForm.value.userId.includes('ALL')"> All Users</label>
+                @for (u of uniqueUsers; track u.id) {
+                  <label class="check-item"><input type="checkbox" (change)="toggleFilter('userId', u.id)" [checked]="filterForm.value.userId.includes(u.id)"> {{ u.name }}</label>
+                }
+              </div>
+            </div>
+          }
+
+          <div class="filter-group">
+            <label>Filter by Hall</label>
+            <div class="checkbox-list">
+              <label class="check-item"><input type="checkbox" (change)="toggleFilter('hallId', 'ALL')" [checked]="filterForm.value.hallId.includes('ALL')"> All Halls</label>
+              @for (hall of availableHalls; track hall.id) {
+                <label class="check-item"><input type="checkbox" (change)="toggleFilter('hallId', hall.id)" [checked]="filterForm.value.hallId.includes(hall.id)"> {{ hall.name }}</label>
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper" style="width: 100%;">
+          <table class="data-table" style="width: 100%;">
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Group & Hall</th>
+                <th>User</th>
+                <th>Status</th>
+                <th class="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (res of tableReservations; track res.id) {
+                <tr>
+                  <td>
+                    <div class="fw-500">{{ res.startTime | date:'mediumDate' }}</div>
+                    <div class="text-muted" style="font-size: 0.85rem;">
+                      {{ res.startTime | date:'shortTime' }} - {{ res.endTime | date:'shortTime' }}
+                    </div>
+                  </td>
+                  
+                  <td>
+                    <div class="fw-500">{{ res.group.name }}</div>
+                    <div class="text-muted" style="font-size: 0.85rem;">{{ res.hall.name }}</div>
+                  </td>
+                  
+                  <td>{{ res.user.name }}</td>
+                  
+                  <td>
+                    <span class="status-badge status-{{ res.state ? res.state.toLowerCase() : 'pending' }}">
+                      {{ res.state || 'PENDING' }}
+                    </span>
+                    @if (res.state.toUpperCase() === 'REJECTED' && res.rejectionReason) {
+                      <div class="rejection-note">Reason: {{ res.rejectionReason }}</div>
+                    }
+                  </td>
+                  
+                  <td class="text-right">
+                    <div class="action-buttons">
+                      
+                      @if (currentUserInfo?.isAdmin && res.state.toUpperCase() === 'PENDING') {
+                        <button class="btn-approve" (click)="openActionModal('APPROVE', res.id)">
+                          Approve
+                        </button>
+                        <button class="btn-reject" (click)="openActionModal('REJECT', res.id)">
+                          Reject
+                        </button>
+                      }
+
+                      @if (res.user.id === currentUserId && (res.state.toUpperCase() === 'PENDING' || res.state.toUpperCase() === 'APPROVED')) {
+                        <button class="btn-cancel" (click)="openActionModal('CANCEL', res.id)">
+                          Cancel
+                        </button>
+                      }
+
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="text-center text-muted" style="padding: 40px;">
+                    No reservations match your filters.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    }
+  }
+</div>
+
+@if (isModalOpen && selectedEvent) {
+  <div class="modal-backdrop">
+    <div class="modal-content" style="max-width: 550px;"> 
+      <div class="modal-header">
+        <h3>Reservation Details</h3>
+        <button class="close-btn" (click)="closeModal()">✖</button>
+      </div>
+      
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 15px;">
+        <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
+          <h4 style="margin: 0; font-size: 1.2rem; color: var(--color-text);">{{ selectedEvent.title }}</h4>
+          <span class="text-muted" style="font-size: 0.85rem;">
+            {{ selectedEvent.start | date:'fullDate' }}
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div>
+            <span class="text-muted" style="font-size: 0.8rem;">Time:</span>
+            <div class="fw-500">{{ selectedEvent.start | date:'shortTime' }} - {{ selectedEvent.end | date:'shortTime' }}</div>
+          </div>
+          <div>
+            <span class="text-muted" style="font-size: 0.8rem;">Status:</span>
+            <div>
+              <span class="status-badge status-{{ selectedEvent.status.toLowerCase() }}">
+                {{ selectedEvent.status }}
+              </span>
+            </div>
+          </div>
+          <div>
+            <span class="text-muted" style="font-size: 0.8rem;">User:</span>
+            <div class="fw-500">{{ selectedEvent.user }}</div>
+          </div>
+          <div>
+            <span class="text-muted" style="font-size: 0.8rem;">Hall:</span>
+            <div class="fw-500">{{ selectedEvent.hall }}</div>
+          </div>
+        </div>
+
+        <div style="background: #f8fafc; padding: 12px; border-radius: 8px;">
+          <span class="text-muted" style="font-size: 0.8rem; display: block; margin-bottom: 4px;">Purpose:</span>
+          <p style="margin: 0; font-size: 0.9rem;">{{ selectedEvent.purpose }}</p>
+        </div>
+      </div>
+      
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        
+        <div class="action-buttons" style="min-width: auto; gap: 8px;">
+          
+          @if (currentUserInfo?.isAdmin && selectedEvent.status.toUpperCase() === 'PENDING') {
+            <button class="btn-solid btn-approve" (click)="openActionModal('APPROVE', selectedEvent.id)">
+              Approve
+            </button>
+            <button class="btn-solid btn-reject" (click)="openActionModal('REJECT', selectedEvent.id)">
+              Reject
+            </button>
+          }
+
+          @if (selectedEvent.userId === currentUserId && (selectedEvent.status.toUpperCase() === 'PENDING' || selectedEvent.status.toUpperCase() === 'APPROVED')) {
+            <button class="btn-solid btn-cancel" (click)="openActionModal('CANCEL', selectedEvent.id)">
+              Cancel
+            </button>
+          }
+        </div>
+
+        <button class="btn btn-outline" (click)="closeModal()" style="margin-left: auto;">
+          Close
+        </button>
+      </div>
+      
+    </div>
+  </div>
+}
+
+@if (isCreateModalOpen) {
+  <div class="modal-backdrop">
+    <div class="modal-content" style="max-width: 600px;">
+      
+      <div class="modal-header">
+        <h3>New Reservation</h3>
+        <button class="close-btn" (click)="closeCreateModal()">✖</button>
+      </div>
+      
+      <form [formGroup]="createForm" (ngSubmit)="onSubmitCreate()">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Group</label>
+            <select formControlName="groupId" class="form-control" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid #cbd5e1;"
+                    [class.error-highlight]="isHoveringSubmit && createForm.get('groupId')?.invalid">
+              <option value="" disabled selected>Select a group...</option>
+              @for (group of myGroups; track group.id) {
+                <option [value]="group.id">{{ group.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Hall</label>
+            <select formControlName="hallId" class="form-control" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid #cbd5e1;"
+                    [class.error-highlight]="isHoveringSubmit && createForm.get('hallId')?.invalid">
+              <option value="" disabled selected>Select a hall...</option>
+              @for (hall of availableHalls; track hall.id) {
+                <option [value]="hall.id">{{ hall.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0; grid-column: span 2;">
+            <label>Date</label>
+            <input type="date" formControlName="date" [min]="minDate"
+                   [class.error-highlight]="isHoveringSubmit && createForm.get('date')?.invalid">
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>Start Time</label>
+            <select formControlName="startTime" class="form-control" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid #cbd5e1;"
+                    [class.error-highlight]="isHoveringSubmit && createForm.get('startTime')?.invalid">
+              <option value="" disabled selected>Select start time...</option>
+              @for (slot of timeSlots; track slot.value) {
+                <option [value]="slot.value">{{ slot.label }}</option>
+              }
+            </select>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 0;">
+            <label>End Time</label>
+            <select formControlName="endTime" class="form-control" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid #cbd5e1;"
+                    [class.error-highlight]="isHoveringSubmit && createForm.get('endTime')?.invalid">
+              <option value="" disabled selected>Select end time...</option>
+              @for (slot of timeSlots; track slot.value) {
+                <option [value]="slot.value">{{ slot.label }}</option>
+              }
+            </select>
+          </div>
+
+        </div>
+
+        <div class="form-group" style="margin-top: 15px;">
+          <label>Purpose</label>
+          <input type="text" formControlName="purpose" placeholder="e.g., Mathematics Midterm Exam"
+                 [class.error-highlight]="isHoveringSubmit && createForm.get('purpose')?.invalid">
+        </div>
+
+        <div class="form-group">
+          <label>Additional Notes (Optional)</label>
+          <textarea formControlName="applicationNotes" rows="2" placeholder="e.g., I will need the projector."></textarea>
+        </div>
+
+        @if (formErrorMessage) {
+          <div class="global-error-message">⚠ {{ formErrorMessage }}</div>
+        }
+        @if (backendErrorMessage) {
+          <div class="global-error-message">{{ backendErrorMessage }}</div>
+        }
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-outline" (click)="closeCreateModal()" [disabled]="isSaving">Cancel</button>
+          
+          <span class="submit-wrapper" 
+                (mouseenter)="isHoveringSubmit = true" 
+                (mouseleave)="isHoveringSubmit = false">
+            <button type="submit" class="btn btn-primary" [disabled]="createForm.invalid || isSaving">
+              {{ isSaving ? 'Saving...' : 'Submit Request' }}
+            </button>
+          </span>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}
+
+@if (actionModalType) {
+  <div class="modal-backdrop">
+    <div class="modal-content" style="max-width: 450px;">
+      
+      <div class="modal-header">
+        <h3>
+          @if (actionModalType === 'APPROVE') { Confirm Approval }
+          @if (actionModalType === 'REJECT') { Reject Reservation }
+          @if (actionModalType === 'CANCEL') { Cancel Reservation }
+        </h3>
+        <button class="close-btn" (click)="closeActionModal()">✖</button>
+      </div>
+      
+      <div class="modal-body" style="padding-bottom: 20px;">
+        @if (actionModalType === 'APPROVE') {
+          <p>Are you sure you want to approve this reservation? The hall will be marked as occupied.</p>
+        }
+        @if (actionModalType === 'CANCEL') {
+          <p>Are you sure you want to cancel your reservation? This action cannot be undone.</p>
+        }
+        @if (actionModalType === 'REJECT') {
+          <p>Please provide a reason for rejecting this reservation. This will be visible to the user.</p>
+          <div class="form-group" style="margin-top: 15px;">
+            <label>Rejection Reason <span style="color:red">*</span></label>
+            <textarea [(ngModel)]="rejectReasonText" rows="3" placeholder="e.g., Hall is undergoing maintenance..." class="form-control" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid #cbd5e1; font-family: inherit;"></textarea>
+          </div>
+        }
+
+        @if (actionErrorMessage) {
+          <div class="global-error-message" style="margin-top: 15px;">
+            ⚠ {{ actionErrorMessage }}
+          </div>
+        }
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-outline" (click)="closeActionModal()" [disabled]="isActionProcessing">Go Back</button>
+        
+        <button type="button" class="btn btn-primary" 
+                [disabled]="(actionModalType === 'REJECT' && !rejectReasonText.trim()) || isActionProcessing"
+                (click)="confirmAction()">
+          {{ isActionProcessing ? 'Processing...' : 'Confirm' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+}

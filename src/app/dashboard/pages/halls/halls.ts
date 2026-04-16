@@ -1,13 +1,7 @@
 import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HallsService } from './halls.service';
-
-export interface Hall {
-  id: string;
-  name: string;
-  description: string;
-  isActive: boolean;
-}
+import { Hall } from '../../../core/models/hall.model';
 
 @Component({
   selector: 'app-halls',
@@ -15,6 +9,7 @@ export interface Hall {
   templateUrl: './halls.html',
   styleUrl: './halls.scss'
 })
+
 export class Halls implements OnInit {
   private hallsService = inject(HallsService);
   private cdr = inject(ChangeDetectorRef)
@@ -66,6 +61,14 @@ export class Halls implements OnInit {
     this.loadHalls();
   }
 
+  onToggleStatus(hall: Hall): void {
+    const newStatus = !hall.isActive;
+    this.hallsService.toggleStatus(hall.id, newStatus).subscribe({
+      next: () => this.loadHalls(),
+      error: (err) => console.error('[Halls] Error toggling status:', err)
+    });
+  }
+
   loadHalls(): void {
     this.hallsService.getHalls().subscribe({
       next: (data: Hall[]) => {
@@ -79,7 +82,7 @@ export class Halls implements OnInit {
     });
   }
 
-  openModal(hall?: Hall) {
+  openModal(hall?: Hall): void {
     if (hall) {
       this.isEditing = true;
       this.currentEditingId = hall.id;
@@ -96,7 +99,7 @@ export class Halls implements OnInit {
     this.showModal = true;
   }
 
-  saveHall() {
+  saveHall(): void {
     if (this.hallForm.invalid) return;
 
     const formData = this.hallForm.value;
@@ -120,16 +123,8 @@ export class Halls implements OnInit {
     }
   }
 
-  closeModal() {
+  closeModal(): void {
     this.showModal = false;
     this.hallForm.reset();
-  }
-
-  onToggleStatus(hall: Hall) {
-    const newStatus = !hall.isActive;
-    this.hallsService.toggleStatus(hall.id, newStatus).subscribe({
-      next: () => this.loadHalls(),
-      error: (err) => console.error('[Halls] Error toggling status:', err)
-    });
   }
 }

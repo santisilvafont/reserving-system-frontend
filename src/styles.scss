@@ -175,6 +175,10 @@ h1, h2, h3 {
   justify-content: center; gap: 8px; animation: fadeIn 0.3s ease-in-out;
 }
 
+.fw-500 { font-weight: 500; color: var(--color-text); }
+.text-muted { color: #64748b; font-size: 0.95rem; }
+.text-right { text-align: right; }
+
 .global-success-message {
   color: #15803d; background-color: #f0fdf4;
   border: 1px solid #bbf7d0; padding: 10px 14px;

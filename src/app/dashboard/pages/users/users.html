@@ -40,18 +40,24 @@
                   {{ user.isActive ? 'Active' : 'Disabled' }}
                 </span>
               </td>
-              @if (currentUserIsAdmin) {
+              @if ( currentUserIsAdmin ) {
                 <td class="text-right">
-                  @if (user.id !== currentUserId) {
+                  
+                  @if (user.id === currentUserId) {
+                    <span class="text-muted" style="font-size: 0.8rem;">(You)</span>
+                  } 
+                  @else if (user.email === superAdminEmail) {
+                    <span class="text-muted" style="font-size: 0.8rem;">(Super Admin)</span>
+                  } 
+                  @else {
                     <div class="action-buttons">
                       <button class="btn-text" (click)="openModal(user)">Edit</button>
                       <button class="btn-text text-danger" (click)="onToggleStatus(user)">
                         {{ user.isActive ? 'Disable' : 'Enable' }}
                       </button>
                     </div>
-                  } @else {
-                    <span class="text-muted" style="font-size: 0.8rem;">(You)</span>
                   }
+
                 </td>
               }
             </tr>

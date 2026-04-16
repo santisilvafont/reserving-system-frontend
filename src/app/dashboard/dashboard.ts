@@ -1,13 +1,7 @@
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { AuthService } from '../auth/auth.service';
-
-export interface CurrentUser {
-  id: string;
-  email: string;
-  name: string;
-  isAdmin: boolean;
-}
+import { CurrentUser } from '../core/models/current-user.model';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,17 +9,27 @@ export interface CurrentUser {
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss'
 })
+
 export class Dashboard implements OnInit {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   currentUser: CurrentUser | null = null;
+  userName: string = '';
 
   ngOnInit(): void {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      this.currentUser = JSON.parse(userData);
-    }
+    this.authService.currentUser$.subscribe(user => {
+      console.log('[Dashboard] Current user updated:', user);
+      
+      if  (user) {
+        setTimeout(() => {
+          this.userName = user.name || 'Invited User';
+          this.currentUser = user;
+          this.cdr.detectChanges();
+        });
+      }
+    });
   }
 
   onLogout(): void {

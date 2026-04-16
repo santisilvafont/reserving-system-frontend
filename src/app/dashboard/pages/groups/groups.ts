@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { GroupsService, Group } from './groups.service';
+import { GroupsService } from './groups.service';
+import { Group } from '../../../core/models/group.model';
 
 @Component({
   selector: 'app-groups',
@@ -8,6 +9,7 @@ import { GroupsService, Group } from './groups.service';
   templateUrl: './groups.html',
   styleUrl: './groups.scss'
 })
+
 export class Groups implements OnInit {
   private groupsService = inject(GroupsService);
   private cdr = inject(ChangeDetectorRef);
@@ -57,6 +59,14 @@ export class Groups implements OnInit {
     }
     this.loadGroups();
   }
+  
+  onToggleStatus(group: Group): void {
+    const newStatus = !group.isActive;
+    this.groupsService.toggleStatus(group.id, newStatus).subscribe({
+      next: () => this.loadGroups(),
+      error: (err) => console.error('[Groups] Error toggling status:', err)
+    });
+  }
 
   loadGroups(): void {
     this.groupsService.getGroups().subscribe({
@@ -68,7 +78,6 @@ export class Groups implements OnInit {
     });
   }
 
-  // Lógica del Modal
   openModal(group?: Group) {
     if (group) {
       this.isEditing = true;
@@ -86,12 +95,12 @@ export class Groups implements OnInit {
     this.showModal = true;
   }
 
-  closeModal() {
+  closeModal(): void {
     this.showModal = false;
     this.groupForm.reset();
   }
 
-  saveGroup() {
+  saveGroup(): void {
     if (this.groupForm.invalid) return;
 
     const formData = this.groupForm.value;
@@ -113,13 +122,5 @@ export class Groups implements OnInit {
         error: (err) => console.error('[Groups] Error creating:', err)
       });
     }
-  }
-
-  onToggleStatus(group: Group) {
-    const newStatus = !group.isActive;
-    this.groupsService.toggleStatus(group.id, newStatus).subscribe({
-      next: () => this.loadGroups(),
-      error: (err) => console.error('[Groups] Error toggling status:', err)
-    });
   }
 }

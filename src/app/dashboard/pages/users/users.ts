@@ -1,6 +1,8 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { UsersService, User } from './users.service';
+import { UsersService } from './users.service';
+import { User } from '../../../core/models/user.model';
+import { environment } from '../../../../environments/environment.development';
 
 @Component({
   selector: 'app-users',
@@ -8,10 +10,12 @@ import { UsersService, User } from './users.service';
   templateUrl: './users.html',
   styleUrl: './users.scss'
 })
+
 export class Users implements OnInit {
   private usersService = inject(UsersService);
   private cdr = inject(ChangeDetectorRef);
   private fb = inject(FormBuilder);
+  superAdminEmail: string = environment.superAdminEmail;
 
   currentUserIsAdmin: boolean = false;
   currentUserId: string | null = null;
@@ -64,6 +68,14 @@ export class Users implements OnInit {
     this.loadUsers();
   }
 
+  onToggleStatus(user: User): void {
+    const newStatus = !user.isActive;
+    this.usersService.toggleStatus(user.id, newStatus).subscribe({
+      next: () => this.loadUsers(),
+      error: (err) => console.error('[Users] Error toggling status:', err)
+    });
+  }
+
   loadUsers(): void {
     this.usersService.getUsers().subscribe({
       next: (data: User[]) => {
@@ -74,7 +86,7 @@ export class Users implements OnInit {
     });
   }
 
-  openModal(user?: User) {
+  openModal(user?: User): void {
     this.backendErrorMessage = null;
     this.isHoveringSubmit = false;
     
@@ -104,12 +116,12 @@ export class Users implements OnInit {
     this.showModal = true;
   }
 
-  closeModal() {
+  closeModal(): void {
     this.showModal = false;
     this.userForm.reset();
   }
 
-  saveUser() {
+  saveUser(): void {
     if (this.userForm.invalid) return;
     this.backendErrorMessage = null;
 
@@ -136,15 +148,7 @@ export class Users implements OnInit {
     }
   }
 
-  onToggleStatus(user: User) {
-    const newStatus = !user.isActive;
-    this.usersService.toggleStatus(user.id, newStatus).subscribe({
-      next: () => this.loadUsers(),
-      error: (err) => console.error('[Users] Error toggling status:', err)
-    });
-  }
-
-  private handleBackendError(err: any) {
+  private handleBackendError(err: any): void {
     console.error('[Users] Backend Error:', err);
     const msg = err.error?.message;
     this.backendErrorMessage = Array.isArray(msg) ? msg[0] : (msg || 'Error processing request.');

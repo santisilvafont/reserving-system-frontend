@@ -44,7 +44,7 @@ export class Register {
     return 'Please complete the form correctly.';
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.registerForm.invalid) return;
     this.backendErrorMessage = null;
 

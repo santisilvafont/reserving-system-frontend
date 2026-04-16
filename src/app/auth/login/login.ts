@@ -9,6 +9,7 @@ import { AuthService } from '../auth.service';
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
+
 export class Login {
   backendErrorMessage: string | null = null;
   private cdr = inject(ChangeDetectorRef);
@@ -38,13 +39,13 @@ export class Login {
     return 'Please complete the form correctly.';
   }
 
-  onSubmit() {
+  onSubmit(): void {
     if (this.loginForm.invalid) return;
 
     this.authService.login(this.loginForm.value).subscribe({
       next: (res) => {
         this.authService.setSession(res);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/dashboard/reservations']);
       },
       error: (err) => {
         console.error('[Login] Error:', err);

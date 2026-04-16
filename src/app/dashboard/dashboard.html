@@ -7,10 +7,9 @@
       </div>
   
       <nav class="sidebar-nav">
-        <a class="nav-item" routerLink="/dashboard/overview" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-          <span class="nav-text">Dashboard</span>
+        <a class="nav-item" routerLink="/dashboard/reservations" routerLinkActive="active">
+          <span class="nav-text">Reservations</span>
         </a>
-        
         <a class="nav-item" routerLink="/dashboard/halls" routerLinkActive="active">
           <span class="nav-text">Halls</span>
         </a>
@@ -22,12 +21,9 @@
           <a class="nav-item" routerLink="/dashboard/users" routerLinkActive="active">
             <span class="nav-text">Users</span>
           </a>
-          <a class="nav-item">
-            <span class="nav-text">Settings</span>
-          </a>
         }
   
-        <a class="nav-item">
+        <a class="nav-item" routerLink="/dashboard/profile" routerLinkActive="active">
           <span class="nav-text">My Profile</span>
         </a>
       </nav>
@@ -41,7 +37,7 @@
         </div>
         
         <div class="user-actions">
-          <span class="user-greeting">Welcome, {{ currentUser?.name }}</span>
+          <span class="user-greeting">Welcome, {{ userName }}</span>
           
           <button class="btn btn-outline-danger" (click)="onLogout()">
             Logout
