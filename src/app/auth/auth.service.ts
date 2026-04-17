@@ -49,6 +49,10 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/auth/forgot-password`, { email });
   }
 
+  resetPassword(data: any): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/auth/reset-password`, data);
+  }
+
   updateCurrentUsername(newName: string): void {
     const currentUser = this.currentUserSubject.value;
     

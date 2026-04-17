@@ -6,6 +6,7 @@ import { User } from '../../../core/models/user.model';
 import { GroupsService } from '../groups/groups.service';
 import { Group } from '../../../core/models/group.model';
 import { forkJoin } from 'rxjs';
+import { environment } from '../../../../environments/environment.development';
 
 @Component({
   selector: 'app-profile',
@@ -13,15 +14,16 @@ import { forkJoin } from 'rxjs';
   templateUrl: './profile.html',
   styleUrl: './profile.scss'
 })
-
 export class Profile implements OnInit {
   private fb = inject(FormBuilder);
   private usersService = inject(UsersService);
   private cdr = inject(ChangeDetectorRef);
   private authService = inject(AuthService);
   private groupsService = inject(GroupsService);
-
+  
+  superAdminEmail = environment.superAdminEmail;
   currentUserId: string = '';
+  currentUserEmail: string = '';
 
   profileForm: FormGroup;
   passwordForm: FormGroup;
@@ -45,8 +47,8 @@ export class Profile implements OnInit {
 
   constructor() {
     this.profileForm = this.fb.group({
-      name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(50)]],
-      email: ['', [Validators.required, Validators.email]],
+      name: ['', [Validators.minLength(3), Validators.maxLength(50)]],
+      email: ['', [Validators.email]],
       description: ['', [Validators.maxLength(200)]]
     });
 
@@ -64,13 +66,9 @@ export class Profile implements OnInit {
     const emailCtrl = this.profileForm.get('email');
     const descCtrl = this.profileForm.get('description');
 
-    if (nameCtrl?.hasError('required')) return 'Name is required.';
     if (nameCtrl?.hasError('minlength')) return 'Name must be at least 3 characters long.';
     if (nameCtrl?.hasError('maxlength')) return 'Name must be at most 50 characters long.';
-
-    if (emailCtrl?.hasError('required')) return 'Email is required.';
     if (emailCtrl?.hasError('email')) return 'Please enter a valid email address.';
-
     if (descCtrl?.hasError('maxlength')) return 'Description must be at most 200 characters long.';
 
     return 'Please complete the form correctly.';
@@ -110,7 +108,7 @@ export class Profile implements OnInit {
     const isChecked = (event.target as HTMLInputElement).checked;
     if ( !group.isActive ) {
       event.preventDefault();
-      return
+      return;
     }
     if (isChecked) {
       this.selectedGroupIds.add(group.id);
@@ -124,13 +122,25 @@ export class Profile implements OnInit {
     this.profileError = null;
     this.profileSuccess = null;
 
-    this.usersService.updateUser(this.currentUserId, this.profileForm.value).subscribe({
+    const formValues = this.profileForm.value;
+    const payload: any = {};
+    if (formValues.name) payload.name = formValues.name;
+    if (formValues.email) payload.email = formValues.email;
+    if (formValues.description !== null && formValues.description !== undefined) {
+      payload.description = formValues.description;
+    }
+
+    this.usersService.updateUser(this.currentUserId, payload).subscribe({
       next: (updatedUser) => {
         this.profileSuccess = 'Profile information updated successfully!';
         const sessionData = JSON.parse(localStorage.getItem('user') || '{}');
-        sessionData.name = updatedUser.name;
+        
+        if (updatedUser.name) sessionData.name = updatedUser.name;
+        if (updatedUser.email) sessionData.email = updatedUser.email;
+        
         localStorage.setItem('user', JSON.stringify(sessionData));
-        this.authService.updateCurrentUsername(updatedUser.name);
+        if (updatedUser.name) this.authService.updateCurrentUsername(updatedUser.name);
+        
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -229,6 +239,7 @@ export class Profile implements OnInit {
   loadUserData(): void {
     this.usersService.getUser(this.currentUserId).subscribe({
       next: (user: User) => {
+        this.currentUserEmail = user.email;
         this.profileForm.patchValue({
           name: user.name,
           email: user.email,

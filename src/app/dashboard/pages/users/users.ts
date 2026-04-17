@@ -76,6 +76,25 @@ export class Users implements OnInit {
     });
   }
 
+  onToggleAdmin(user: User) {
+    if (user.email === this.superAdminEmail) return; 
+
+    const newRole = !user.isAdmin;
+    
+    user.isAdmin = newRole;
+    this.cdr.detectChanges();
+
+    this.usersService.toggleAdminRole(user.id, newRole).subscribe({
+      next: () => {
+      },
+      error: (err) => {
+        user.isAdmin = !newRole;
+        this.cdr.detectChanges();
+        console.error('Error toggling role:', err);
+      }
+    });
+  }
+
   loadUsers(): void {
     this.usersService.getUsers().subscribe({
       next: (data: User[]) => {

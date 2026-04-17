@@ -19,11 +19,19 @@
             <input type="text" formControlName="name" placeholder="Jane Doe"
                    [class.error-highlight]="isHoveringProfile && profileForm.get('name')?.invalid">
           </div>
-  
+
           <div class="form-group">
             <label>Email Address</label>
-            <input type="email" formControlName="email" placeholder="jane@fundation.com"
-                   [class.error-highlight]="isHoveringProfile && profileForm.get('email')?.invalid">
+            
+            @if (currentUserEmail === superAdminEmail) {
+              <input type="email" [value]="currentUserEmail" class="form-control" readonly style="background-color: #f1f5f9; color: #64748b; cursor: not-allowed;" title="Super Administrator email cannot be changed">
+              <small style="color: #64748b; font-size: 0.8rem; display: block; margin-top: 5px;">
+                The Super Administrator email cannot be modified for security reasons.
+              </small>
+            } @else {
+              <input type="email" formControlName="email" class="form-control"
+                     [class.error-highlight]="isHoveringProfile && profileForm.get('email')?.invalid">
+            }
           </div>
   
           <div class="form-group">

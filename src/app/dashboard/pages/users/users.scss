@@ -55,3 +55,36 @@
   justify-content: flex-end;
   gap: 12px;
 }
+
+.btn-role-toggle {
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  font-size: 0.85rem;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-role-admin {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
+
+  &:hover:not(:disabled) {
+    background-color: #fee2e2;
+  }
+}
+
+.btn-role-user {
+  background-color: #f0f9ff;
+  color: #0284c7;
+  border: 1px solid #bae6fd;
+
+  &:hover:not(:disabled) {
+    background-color: #e0f2fe;
+  }
+}

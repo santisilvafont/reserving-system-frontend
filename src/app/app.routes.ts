@@ -9,6 +9,7 @@ import { Register } from './auth/register/register';
 import { ForgotPassword } from './auth/forgot-password/forgot-password';
 import { Profile } from './dashboard/pages/profile/profile';
 import { Reservations } from './dashboard/pages/reservations/reservations';
+import { ResetPassword } from './auth/reset-password/reset-password';
 
 export const routes: Routes = [
     { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -27,7 +28,11 @@ export const routes: Routes = [
         component: ForgotPassword,
         title: 'Forgot Password | Reserving System'
     },
-    
+    { 
+        path: 'auth/reset-password', 
+        component: ResetPassword,
+        title: 'Reset Password | Reserving System'
+    },
     { 
         path: 'dashboard', 
         component: Dashboard,

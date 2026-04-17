@@ -4,16 +4,36 @@ A modern and reactive system for managing room and space reservations, designed 
 
 This project represents the user interface (Frontend), allowing professors and administrators to manage schedules, view real-time availability through an interactive calendar, and manage halls, groups, and users.
 
-## 🚀 Technologies Used
+<p align="center">
+  <a href="https://angular.dev/" target="blank">
+    <img src="https://angular.dev/assets/images/press-kit/angular_wordmark_gradient.png" width="200" alt="Angular Logo" />
+  </a>
+</p>
 
-This project was built using modern tools from the web development ecosystem:
+<p align="center">
+  <img src="https://img.shields.io/badge/Angular-%23DD0031.svg?style=for-the-badge&logo=angular&logoColor=white" alt="Angular" />
+  <img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Sass-%23CC6699.svg?style=for-the-badge&logo=sass&logoColor=white" alt="Sass" />
+  <img src="https://img.shields.io/badge/RxJS-%23B7178C.svg?style=for-the-badge&logo=reactivex&logoColor=white" alt="RxJS" />
+</p>
 
-* Framework: Angular (Standalone Components).
-* Language: TypeScript.
-* Styling: SCSS (CSS Preprocessor) with a 100% responsive design and Custom Properties (CSS Variables).
-* Interactive Calendar: FullCalendar (Plugins: dayGrid, timeGrid, interaction).
-* Form Handling: Angular Reactive Forms.
-* HTTP Requests: Native Angular HttpClient + RxJS.
+---
+
+<div align="center">
+
+## 🛠️ Tech Stack
+
+| Category | Technology Used |
+| :--- | :--- |
+| **Core Framework** | **Angular 18+** (Standalone Components) |
+| **Language** | **TypeScript** |
+| **Styling** | **SCSS** (Custom Properties & Responsive Design) |
+| **State & Async** | **RxJS** & Angular Signals |
+| **Forms** | **Reactive Forms** |
+| **Interactive Calendar**| **FullCalendar** (dayGrid, timeGrid, interaction) |
+
+</div>
+<br>
 
 ## 🛠️ How to Run the Project (Local Development)
 
@@ -47,25 +67,33 @@ Open your browser and visit `http://localhost:4200/`. The application will autom
 
 ## 📂 Folder Layout
 
-The project follows a modular architecture based on "Features" to keep the code scalable and organized:
+The project follows a modular architecture based on "Features" to keep the code scalable, organized, and easy to maintain. All core logic and features are encapsulated within the `src` directory:
 
-src/
-├── app/
-│   ├── core/                 # Global elements (Guards, Interceptors, Tokens)
-│   │   └── models/           # Centralized Interfaces and Enums (Users, Reservations, etc.)
+```bash
+📂 src/
+├── 📂 app/
+│   ├── 📂 auth/                 # Authentication Module
+│   │   ├── 📂 forgot-password/  # Password recovery flow
+│   │   ├── 📂 guards/           # Route protection (e.g., auth.guard)
+│   │   ├── 📂 interceptors/     # HTTP request manipulation (token injection)
+│   │   ├── 📂 login/            # User authentication and token retrieval
+│   │   └── 📂 register/         # New user creation
 │   │
-│   ├── auth/                 # Authentication Module (Login, Password Recovery)
+│   ├── 📂 core/                 # Global configurations and definitions
+│   │   └── 📂 models/           # Centralized Interfaces and Enums
 │   │
-│   ├── dashboard/            # Main Layout (Sidebar, Topbar)
-│   │   └── pages/            # Main views of the application
-│   │       ├── reservations/ # Calendar logic, tables, and modals
-│   │       ├── halls/        # Halls CRUD
-│   │       ├── groups/       # Groups/Subjects CRUD
-│   │       ├── users/        # User Management (Admins only)
-│   │       └── profile/      # Current user profile
+│   ├── 📂 dashboard/            # Main Layout and Core Features
+│   │   └── 📂 pages/            # Application views (each includes its own service)
+│   │       ├── 📂 groups/       # Groups/Subjects CRUD operations
+│   │       ├── 📂 halls/        # Halls CRUD operations
+│   │       ├── 📂 profile/      # Current user profile and settings
+│   │       ├── 📂 reservations/ # Calendar logic, tables, and modal interactions
+│   │       └── 📂 users/        # User Management (Admins only)
 │   │
-│   └── app.routes.ts         # Main route definitions
+│   ├── 📄 app.routes.ts         # Main route definitions
+│   └── 📄 app.config.ts         # Application global configuration
 │
-├── environments/             # Environment variables (Development and Production)
-├── assets/                   # Images, icons, and static files
-└── styles.scss               # Global styles and CSS reset
+├── 📂 environments/             # Environment variables (Development and Production)
+├── 📂 public/                   # Public static assets (favicon.ico)
+└── 📄 styles.scss               # Global styles, CSS variables, and resets
+```

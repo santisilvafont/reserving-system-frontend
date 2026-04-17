@@ -24,6 +24,10 @@ export class UsersService {
     return this.http.patch<User>(`${this.apiUrl}/users/${id}`, user);
   }
 
+  toggleAdminRole(userId: string, isAdmin: boolean) {
+    return this.http.patch(`${this.apiUrl}/users/${userId}/role`, { isAdmin });
+  }
+
   toggleStatus(id: string, isActive: boolean): Observable<User> {
     return this.http.patch<User>(`${this.apiUrl}/users/${id}/status`, { isActive });
   }
